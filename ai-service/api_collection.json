@@ -1,0 +1,336 @@
+{
+  "info": {
+    "name": "Face Recognition Microservice",
+    "description": "API collection for testing face enrollment and verification",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        },
+        "description": "Check if the service is running and healthy"
+      },
+      "response": []
+    },
+    {
+      "name": "Root Endpoint",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/",
+          "host": ["{{base_url}}"],
+          "path": [""]
+        },
+        "description": "Get API information and available endpoints"
+      },
+      "response": []
+    },
+    {
+      "name": "Enroll Face - Success",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": "/path/to/test/face/image.jpg",
+              "description": "Face image for enrollment (JPEG/PNG)"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/enroll",
+          "host": ["{{base_url}}"],
+          "path": ["enroll"]
+        },
+        "description": "Enroll a face and get embedding vector"
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "face.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/enroll",
+              "host": ["{{base_url}}"],
+              "path": ["enroll"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": true,\n  \"embedding\": [0.123, -0.456, 0.789, \"... (512 values)\"],\n  \"message\": \"Face enrolled successfully\",\n  \"face_detected\": true,\n  \"quality_score\": 87.5,\n  \"timestamp\": \"2024-01-15T10:30:00.000000\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Enroll Face - No Face Detected",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": "/path/to/non-face/image.jpg",
+              "description": "Image without face"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/enroll",
+          "host": ["{{base_url}}"],
+          "path": ["enroll"]
+        },
+        "description": "Test enrollment with image that has no face"
+      },
+      "response": []
+    },
+    {
+      "name": "Enroll Face - Multiple Faces",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": "/path/to/group/photo.jpg",
+              "description": "Image with multiple faces"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/enroll",
+          "host": ["{{base_url}}"],
+          "path": ["enroll"]
+        },
+        "description": "Test enrollment with multiple faces (should fail)"
+      },
+      "response": []
+    },
+    {
+      "name": "Verify Face - Match",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Set this to your stored embedding from enrollment",
+              "pm.environment.set(\"stored_embedding\", \"[0.123,-0.456,0.789,...]\");"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": "/path/to/verification/face.jpg",
+              "description": "Live face image for verification"
+            },
+            {
+              "key": "stored_embedding",
+              "value": "{{stored_embedding}}",
+              "type": "text",
+              "description": "Stored embedding from enrollment (JSON array)"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/verify",
+          "host": ["{{base_url}}"],
+          "path": ["verify"]
+        },
+        "description": "Verify face against stored embedding"
+      },
+      "response": [
+        {
+          "name": "Match Found",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "verify.jpg"
+                },
+                {
+                  "key": "stored_embedding",
+                  "value": "[...]",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/verify",
+              "host": ["{{base_url}}"],
+              "path": ["verify"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": true,\n  \"match\": true,\n  \"confidence\": 92.45,\n  \"message\": \"Verification completed successfully\",\n  \"similarity_score\": 0.0755,\n  \"threshold_used\": 0.40,\n  \"timestamp\": \"2024-01-15T10:35:00.000000\"\n}"
+        },
+        {
+          "name": "No Match",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "different_person.jpg"
+                },
+                {
+                  "key": "stored_embedding",
+                  "value": "[...]",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/verify",
+              "host": ["{{base_url}}"],
+              "path": ["verify"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": true,\n  \"match\": false,\n  \"confidence\": 45.32,\n  \"message\": \"Verification completed successfully\",\n  \"similarity_score\": 0.5468,\n  \"threshold_used\": 0.40,\n  \"timestamp\": \"2024-01-15T10:36:00.000000\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Verify Face - No Face Detected",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": "/path/to/non-face/image.jpg"
+            },
+            {
+              "key": "stored_embedding",
+              "value": "{{stored_embedding}}",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/verify",
+          "host": ["{{base_url}}"],
+          "path": ["verify"]
+        },
+        "description": "Test verification with no face in image"
+      },
+      "response": []
+    },
+    {
+      "name": "Verify Face - Invalid Embedding",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": "/path/to/face/image.jpg"
+            },
+            {
+              "key": "stored_embedding",
+              "value": "invalid_json_here",
+              "type": "text",
+              "description": "Invalid JSON to test error handling"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/verify",
+          "host": ["{{base_url}}"],
+          "path": ["verify"]
+        },
+        "description": "Test with invalid embedding format"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "stored_embedding",
+      "value": "[]",
+      "type": "string",
+      "description": "Replace with actual embedding from enrollment"
+    }
+  ]
+}

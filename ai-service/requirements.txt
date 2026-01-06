@@ -1,0 +1,19 @@
+# FastAPI and server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# Face recognition
+deepface==0.0.89
+opencv-python==4.9.0.80
+opencv-contrib-python==4.9.0.80
+tf-keras==2.16.0
+tensorflow==2.16.1
+
+# Image processing
+Pillow==10.2.0
+numpy==1.26.3
+
+# Additional utilities
+pydantic==2.5.3
+python-dotenv==1.0.0
