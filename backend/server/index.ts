@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import mongoose from "./db";
 
 const app = express();
 const httpServer = createServer(app);
@@ -60,6 +61,14 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Wait for DB connection to establish
+  await new Promise((resolve) => {
+    mongoose.connection.once('connected', () => {
+      console.log('Database connected successfully');
+      resolve(true);
+    });
+  });
+  
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -88,8 +97,8 @@ app.use((req, res, next) => {
   httpServer.listen(
     {
       port,
-      host: "0.0.0.0",
-      reusePort: true,
+      host: "localhost",
+      reusePort: false,
     },
     () => {
       log(`serving on port ${port}`);

@@ -1,8 +1,7 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import pg from "pg";
-import * as schema from "@shared/schema";
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-const { Pool } = pg;
+dotenv.config();
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -10,5 +9,9 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle(pool, { schema });
+// Connect to MongoDB
+mongoose.connect(process.env.DATABASE_URL)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+export default mongoose;

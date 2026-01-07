@@ -8,7 +8,7 @@ export const api = {
       path: '/api/auth/login',
       input: z.object({ username: z.string(), password: z.string() }),
       responses: {
-        200: z.custom<typeof users.$inferSelect>(),
+        200: users,
         401: z.object({ message: z.string() }),
       },
     },
@@ -23,7 +23,7 @@ export const api = {
       method: 'GET' as const,
       path: '/api/auth/me',
       responses: {
-        200: z.custom<typeof users.$inferSelect>(),
+        200: users,
         401: z.object({ message: z.string() }),
       },
     }
@@ -34,7 +34,7 @@ export const api = {
       path: '/api/face/enroll',
       input: z.object({ userId: z.number(), embedding: z.any() }),
       responses: {
-        200: z.custom<typeof users.$inferSelect>(),
+        200: users,
         400: z.object({ message: z.string() }),
       },
     }
@@ -45,7 +45,7 @@ export const api = {
       path: '/api/attendance/mark',
       input: z.object({ lat: z.number(), lng: z.number(), faceEmbedding: z.any() }),
       responses: {
-        200: z.object({ status: z.string(), message: z.string().optional(), record: z.custom<typeof attendance.$inferSelect>().optional() }),
+        200: z.object({ status: z.string(), message: z.string().optional(), record: attendance.optional() }),
         400: z.object({ message: z.string() }),
       },
     },
@@ -53,7 +53,7 @@ export const api = {
       method: 'GET' as const,
       path: '/api/attendance/history',
       responses: {
-        200: z.array(z.custom<typeof attendance.$inferSelect>()),
+        200: z.array(attendance),
       },
     }
   },
@@ -62,14 +62,14 @@ export const api = {
       method: 'GET' as const,
       path: '/api/admin/attendance',
       responses: {
-        200: z.array(z.custom<typeof attendance.$inferSelect>()),
+        200: z.array(attendance),
       },
     },
     suspicious: {
       method: 'GET' as const,
       path: '/api/admin/suspicious',
       responses: {
-        200: z.array(z.custom<typeof suspiciousLogs.$inferSelect>()),
+        200: z.array(suspiciousLogs)
       },
     }
   }

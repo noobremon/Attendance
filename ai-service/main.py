@@ -3,6 +3,9 @@ Face Recognition Microservice for Attendance System
 A stateless AI service for face enrollment and verification
 """
 
+# Import patch first to handle compatibility issues
+import startup_patch
+
 from fastapi import FastAPI, HTTPException, File, UploadFile, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field

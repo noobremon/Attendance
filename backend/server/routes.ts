@@ -2,12 +2,16 @@ import type { Express } from "express";
 import type { Server } from "http";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
+import type { User, Attendance, SuspiciousLog, Location, InsertUser, InsertAttendance, InsertLocation, InsertSuspiciousLog } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
-import MemoryStore from "memorystore";
+import MongoStore from 'connect-mongo';
 import { aiService } from "./aiService";
 
-const SessionStore = MemoryStore(session);
+// Use MongoDB for session storage
+const store = MongoStore.create({
+  mongoUrl: process.env.DATABASE_URL || 'mongodb://localhost:27017/attendance_sessions',
+});
 
 // Extend express-session
 declare module "express-session" {
@@ -23,13 +27,15 @@ export async function registerRoutes(
   // Session setup
   app.use(
     session({
-      store: new SessionStore({ checkPeriod: 86400000 }),
+      store: store,
       secret: "your-secret-key", // In prod use ENV
       resave: false,
       saveUninitialized: false,
       cookie: { secure: false } // Set to true in prod with HTTPS
     })
   );
+
+  // API routes will be registered here
 
   // Auth Routes
   app.post(api.auth.login.path, async (req, res) => {

@@ -5,7 +5,27 @@ Core logic for face detection, embedding generation, and verification
 
 import cv2
 import numpy as np
-from deepface import DeepFace
+# Environment configuration
+import os
+os.environ['TF_KERAS'] = '1'
+
+# NOTE: Patching is done in startup_patch.py which is imported in main.py before this module
+# So the LocallyConnected2D should already be available
+
+# Delay DeepFace import to avoid import conflicts
+deepface_module = None
+
+def get_deepface():
+    global deepface_module
+    if deepface_module is None:
+        # Import DeepFace after patches are applied
+        import deepface as df
+        deepface_module = df
+    return deepface_module
+
+# Import other modules we need
+import cv2
+import numpy as np
 from typing import Dict, List, Tuple
 import logging
 from io import BytesIO
@@ -54,14 +74,9 @@ class FaceRecognitionService:
         """Initialize the face recognition service"""
         logger.info(f"Initializing FaceRecognitionService with model: {self.MODEL_NAME}")
         
-        # Warm up the model by loading it
-        try:
-            # This will download and cache the model on first run
-            DeepFace.build_model(self.MODEL_NAME)
-            logger.info("Face recognition model loaded successfully")
-        except Exception as e:
-            logger.error(f"Failed to load model: {str(e)}")
-            raise
+        # Don't pre-load model to avoid startup issues
+        # Model will be loaded on first use
+        logger.info("Face recognition service initialized. Models will load on first use.")
     
     def _load_image_from_bytes(self, image_data: bytes) -> np.ndarray:
         """
@@ -177,6 +192,7 @@ class FaceRecognitionService:
         """
         try:
             # Detect faces using OpenCV's Haar Cascade
+            DeepFace = get_deepface()
             face_objs = DeepFace.extract_faces(
                 img_path=image,
                 detector_backend=self.DETECTOR_BACKEND,
@@ -248,6 +264,7 @@ class FaceRecognitionService:
         """
         try:
             # Generate embedding
+            DeepFace = get_deepface()
             embedding_objs = DeepFace.represent(
                 img_path=image,
                 model_name=self.MODEL_NAME,
