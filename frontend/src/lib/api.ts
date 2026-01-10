@@ -54,11 +54,14 @@ const getAuthToken = () => {
 
 // Helper function to make API requests
 const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
-  const response = await fetch(endpoint, {
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+  // Get token before making the request
+  const token = getAuthToken();
+  const response = await fetch(`${apiUrl}${endpoint}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${getAuthToken()}`,
+      ...(token && { 'Authorization': `Bearer ${token}` }), // Only add if token exists
       ...options.headers,
     },
   });
@@ -74,7 +77,8 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
 // Auth API
 export const authApi = {
   login: async (username: string, password: string): Promise<{ user: User; token: string }> => {
-    const response = await fetch('/api/auth/login', {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    const response = await fetch(`${apiUrl}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -96,7 +100,8 @@ export const authApi = {
   },
 
   register: async (data: { username: string; password: string; email: string }): Promise<{ user: User; token: string }> => {
-    const response = await fetch('/api/auth/register', {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    const response = await fetch(`${apiUrl}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -118,7 +123,8 @@ export const authApi = {
   },
 
   logout: async (): Promise<void> => {
-    await fetch('/api/auth/logout', {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    await fetch(`${apiUrl}/api/auth/logout`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${getAuthToken()}`,
@@ -129,7 +135,8 @@ export const authApi = {
   },
 
   getMe: async (): Promise<User> => {
-    const response = await fetch('/api/auth/me', {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    const response = await fetch(`${apiUrl}/api/auth/me`, {
       headers: {
         'Authorization': `Bearer ${getAuthToken()}`,
       },
